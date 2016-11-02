@@ -1,0 +1,29 @@
+---
+
+- name : installing httpd dependency
+  apt  : 
+    name  :  "{{ item }}" 
+    state : present
+  with_items : 
+    - apache2
+
+- name: conf apache2
+  template: 
+    src : templates/jenkins.conf.normal 
+    dest : /etc/apache2/sites-available
+
+- name: link to apache2 config
+  file: src=/etc/apache2/sites-available/jenkins.conf.normal dest=/etc/apache2/sites-available/jenkins.conf state=link
+
+- name: enabling the config dependencies
+  apache2_module: state=present name="{{ item }}"
+  with_items:
+    - ssl
+    - proxy
+    - proxy_http
+
+- name : enabling the config
+  shell : a2ensite jenkins.conf
+
+- name : starting apache2 service
+  service: name=apache2 state=restarted enabled=yes

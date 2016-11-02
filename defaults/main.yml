@@ -1,0 +1,6 @@
+---
+
+servername : jenkins-entreprise.savoirfairelinux.com
+
+ssl_certificate_file  : /etc/ssl/certs/*.savoirefairelinux.com
+ssl_certificate_key : 

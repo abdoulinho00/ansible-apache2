@@ -1,0 +1,48 @@
+<VirtualHost *:80>
+        ServerAdmin felix.lombard-platet@savoirfairelinux.com
+        ServerName  {{ servername }}
+
+        ErrorLog /var/log/apache2/jenkins-error.log
+        CustomLog /var/log/apache2/jenkins-access.log combined
+        RedirectPermanent       /       https://{{ servername }}/
+</VirtualHost>
+
+
+<IfModule mod_proxy.c>
+<VirtualHost *:443>
+        ServerAdmin felix.lombard-platet@savoirfairelinux.com
+        ServerName {{ servername }}
+
+        ErrorLog /var/log/apache2/ssl-jenkins-error.log
+
+        # Possible values include: debug, info, notice, warn, error, crit,
+        # alert, emerg.
+        LogLevel warn
+
+        CustomLog /var/log/apache2/ssl-jenkins-access.log combined
+        ServerSignature On
+        TransferLog /var/log/apache2/jenkins.access_log
+        SSLEngine On
+        SSLCipherSuite ALL:!ADH:!EXPORT:!SSLv2:RC4+RSA:+HIGH:+MEDIUM:+LOW
+        SSLCertificateFile    {{ ssl_certificate_file }}
+        SSLCertificateKeyFile {{ ssl_certificate_key }}
+#       SSLCertificateChainFile /etc/pki/tls/certs/gd_bundle2.crt
+#       RewriteEngine On
+
+        ProxyPreserveHost On
+        ProxyRequests Off
+        ProxyVia Off
+
+        <Proxy *>
+           # Auth changes in 2.4 - see http://httpd.apache.org/docs/2.4/upgrading.html#run-time
+           Require all granted
+        </Proxy>
+
+        ProxyPass /  http://127.0.0.1:8080/
+        ProxyPassReverse / http://127.0.0.1:8080/
+        <Location / >
+           # Auth changes in 2.4 - see http://httpd.apache.org/docs/2.4/upgrading.html#run-time
+           Require all granted
+        </Location>
+</VirtualHost>
+</IfModule>
