@@ -6,14 +6,34 @@
     state : present
   with_items : 
     - apache2
+    - apache2-utils
+
+- name : copying ssl certifcate file
+  copy :
+    src : "{{ ssl_certificate_file }}"
+    dest : "/etc/ssl/private/ssl-cert-{{servername }}.pem"
+  when : ssl_available and ssl_certificate_file is defined
+
+- name : copying ssl certifcate key file
+  copy :
+    src : "{{ ssl_certificate_keyfile }}"
+    dest : "/etc/ssl/private/ssl-cert-{{servername }}.key"
+  when : ssl_available and ssl_certificate_keyfile is defined
+
+- stat: path=/etc/ssl/certs/ssl-cert-{{servername }}.key
+  register: ssl_cert
+
+- stat: path=/etc/ssl/private/ssl-cert-{{ servername }}.pem
+  register: ssl_key
+
+- name: Generate SSL certificates
+  shell: openssl req -x509 -newkey rsa:4049 -keyout /etc/ssl/private/ssl-cert-{{ servername }}.key -out /etc/ssl/certs/ssl-cert-{{ servername }}.pem -days 1825 -subj '/CN={{ servername }}' -nodes
+  when: not (ssl_cert.stat.exists and ssl_key.stat.exists)
 
 - name: conf apache2
   template: 
-    src : templates/jenkins.conf.normal 
-    dest : /etc/apache2/sites-available
-
-- name: link to apache2 config
-  file: src=/etc/apache2/sites-available/jenkins.conf.normal dest=/etc/apache2/sites-available/jenkins.conf state=link
+    src : templates/apache2.conf.normal
+    dest : /etc/apache2/sites-available/{{servername}}.conf
 
 - name: enabling the config dependencies
   apache2_module: state=present name="{{ item }}"
@@ -23,7 +43,7 @@
     - proxy_http
 
 - name : enabling the config
-  shell : a2ensite jenkins.conf
+  shell : a2ensite {{servername}}.conf
 
 - name : starting apache2 service
   service: name=apache2 state=restarted enabled=yes
