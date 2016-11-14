@@ -10,7 +10,7 @@
 
 <IfModule mod_proxy.c>
 <VirtualHost *:443>
-        ServerAdmin felix.lombard-platet@savoirfairelinux.com
+        ServerAdmin {{ serveradmin }}
         ServerName {{ servername }}
 
         ErrorLog /var/log/apache2/ssl-jenkins-error.log
@@ -38,8 +38,8 @@
            Require all granted
         </Proxy>
 
-        ProxyPass /  http://127.0.0.1:8080/{{ appname | default("") }}
-        ProxyPassReverse / http://127.0.0.1:8080/{{ appname | default("")}}
+        ProxyPass /  http://127.0.0.1:8080/{{ appname | default("") }}/
+        ProxyPassReverse / http://127.0.0.1:8080/{{ appname | default("")}}/
         <Location / >
            # Auth changes in 2.4 - see http://httpd.apache.org/docs/2.4/upgrading.html#run-time
            Require all granted
