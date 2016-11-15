@@ -8,6 +8,7 @@
 </VirtualHost>
 
 
+
 <IfModule mod_proxy.c>
 <VirtualHost *:443>
         ServerAdmin {{ serveradmin }}
@@ -38,8 +39,8 @@
            Require all granted
         </Proxy>
 
-        ProxyPass /  http://127.0.0.1:8080/{{ appname | default("") }}/
-        ProxyPassReverse / http://127.0.0.1:8080/{{ appname | default("")}}/
+        ProxyPass /  http://127.0.0.1:8080/
+        ProxyPassReverse / http://127.0.0.1:8080/
         <Location / >
            # Auth changes in 2.4 - see http://httpd.apache.org/docs/2.4/upgrading.html#run-time
            Require all granted
